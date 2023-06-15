@@ -1,0 +1,56 @@
+name: Check PRs
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      
+jobs:
+  check-prs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: List Open PRs
+        id: list-prs
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: pullRequests } = await github.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              base: context.payload.pull_request.base.ref
+            });
+            return pullRequests;
+
+      - name: Check PRs
+        run: |
+          prs=$(echo "${{ steps.list-prs.outputs.result }}" | jq '.[] | select(.number != ${{ github.event.pull_request.number }})')
+          if [[ ! -z $prs ]]; then
+            echo "There are other open pull requests for this branch:"
+            echo "$prs"
+            echo "::set-output name=check_status::failure"
+          else
+            echo "No other open pull requests for this branch."
+            echo "::set-output name=check_status::success"
+          fi
+
+      - name: Set Status Check
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const status = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request.head.sha,
+              state: '${{ steps.check-prs.outputs.check_status }}',
+              context: 'Check PRs',
+              description: 'Check if there are other open pull requests for this branch',
+            };
+            await github.repos.createCommitStatus(status);      
