@@ -1,22 +1,20 @@
 name: Check PRs
-
-on:
+'on':
   pull_request_target:
-    types: [opened, synchronize]
-    
+    types:
+      - opened
+      - synchronize
 jobs:
   check-prs:
     runs-on: self-hosted
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
       - name: List Open PRs
         id: list-prs
         uses: actions/github-script@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
           script: |
             const { data: pullRequests } = await github.pulls.list({
               owner: context.repo.owner,
@@ -25,10 +23,11 @@ jobs:
               base: context.payload.pull_request.base.ref
             });
             return pullRequests;
-
       - name: Check PRs
-        run: |
-          prs=$(echo "${{ steps.list-prs.outputs.result }}" | jq '.[] | select(.number != ${{ github.event.pull_request.number }})')
+        run: >
+          prs=$(echo "${{ steps.list-prs.outputs.result }}" | jq '.[] |
+          select(.number != ${{ github.event.pull_request.number }})')
+
           if [[ ! -z $prs ]]; then
             echo "There are other open pull requests for this branch:"
             echo "$prs"
@@ -37,11 +36,10 @@ jobs:
             echo "No other open pull requests for this branch."
             echo "::set-output name=check_status::success"
           fi
-
       - name: Set Status Check
         uses: actions/github-script@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
           script: |
             const status = {
               owner: context.repo.owner,
