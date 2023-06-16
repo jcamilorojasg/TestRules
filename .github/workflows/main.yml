@@ -5,6 +5,7 @@ on:
     types:
       - synchronize
       - opened
+
 jobs:
   check-prs:
     runs-on: self-hosted
@@ -16,33 +17,34 @@ jobs:
       - name: List Open PRs
         id: list-prs
         run: |
-          prs=$(curl -s -X GET "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&base=${{ github.event.pull_request.base.ref }}")
-          echo "PRS=$prs" >> $GITHUB_ENV
+          $prs = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&base=${{ github.event.pull_request.base.ref }}"
+          $prs | ConvertTo-Json | Out-File prs.json
 
       - name: Check PRs
-        id: check-prs
         run: |
-          prs=$PRS
-          if [[ ! -z $prs ]]; then
-            echo "There are other open pull requests for this branch:"
-            echo "$prs"
-            echo "::set-env name=CHECK_STATUS::failure"
-          else
-            echo "No other open pull requests for this branch."
-            echo "::set-env name=CHECK_STATUS::success"
-          fi
+          $prs = Get-Content prs.json | ConvertFrom-Json
+          if ($prs.Count -gt 0) {
+            Write-Host "There are other open pull requests for this branch:"
+            Write-Host "$prs"
+            $env:CHECK_STATUS = "failure"
+          } else {
+            Write-Host "No other open pull requests for this branch."
+            $env:CHECK_STATUS = "success"
+          }
 
       - name: Set Status Check
         run: |
-          status='{
-            "owner": "'$GITHUB_REPOSITORY_OWNER'",
-            "repo": "'$GITHUB_REPOSITORY'",
-            "sha": "'$GITHUB_SHA'",
-            "state": "'$CHECK_STATUS'",
-            "context": "Check PRs",
-            "description": "Check if there are other open pull requests for this branch"
-          }'
-          curl -s -X POST "https://api.github.com/repos/${{ github.repository }}/statuses/$GITHUB_SHA" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "$status"
+          $status = @{
+            owner = $env:GITHUB_REPOSITORY.Split("/")[0]
+            repo = $env:GITHUB_REPOSITORY.Split("/")[1]
+            sha = $env:GITHUB_SHA
+            state = $env:CHECK_STATUS
+            context = "Check PRs"
+            description = "Check if there are other open pull requests for this branch"
+          }
+          $status | ConvertTo-Json | Out-File status.json
+          $headers = @{
+            Authorization = "Bearer $env:GITHUB_TOKEN"
+            "Content-Type" = "application/json"
+          }
+          Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/${{ github.repository }}/statuses/$env:GITHUB_SHA" -Headers $headers -InFile status.json
