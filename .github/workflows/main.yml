@@ -5,7 +5,7 @@ on:
     types:
       - synchronize
       - opened
-      
+
 jobs:
   check-prs:
     runs-on: self-hosted
@@ -38,8 +38,8 @@ jobs:
             owner = $env:GITHUB_REPOSITORY.Split("/")[0]
             repo = $env:GITHUB_REPOSITORY.Split("/")[1]
             sha = $env:GITHUB_SHA
-            state = ${{ steps.check-prs.outputs.check_status }}
+            state = $env:CHECK_STATUS
             context = "Check PRs"
             description = "Check if there are other open pull requests for this branch"
-          } | ConvertTo-Json
-          Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/${{ github.repository }}/statuses/$env:GITHUB_SHA" -Headers @{Authorization = "Bearer $env:GITHUB_TOKEN"} -ContentType "application/json" -Body $status
+          }
+          Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/${{ github.repository }}/statuses/$env:GITHUB_SHA" -Headers @{Authorization = "Bearer $env:GITHUB_TOKEN"} -ContentType "application/json" -Body ($status | ConvertTo-Json)
