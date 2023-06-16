@@ -18,25 +18,20 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { data: pullRequests } = await github.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              base: context.payload.pull_request.base.ref
-            });
-            return pullRequests;
+            $pullRequests = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/$(echo $GITHUB_REPOSITORY)/pulls?state=open&base=$(echo ${{ github.event.pull_request.base.ref }})"
+            $pullRequests
 
       - name: Check PRs
         run: |
-          prs=$(echo "${{ steps.list-prs.outputs.result }}" | jq '.[] | select(.number != ${{ github.event.pull_request.number }})')
-          if [[ ! -z $prs ]]; then
-            echo "There are other open pull requests for this branch:"
-            echo "$prs"
+          $prs = ${{ steps.list-prs.outputs.result }} | ConvertFrom-Json
+          if ($prs -ne $null) {
+            Write-Host "There are other open pull requests for this branch:"
+            Write-Host "$prs"
             echo "::set-output name=check_status::failure"
-          else
-            echo "No other open pull requests for this branch."
+          } else {
+            Write-Host "No other open pull requests for this branch."
             echo "::set-output name=check_status::success"
-          fi
+          }
 
       - name: Set Status Check
         uses: actions/github-script@v4
@@ -51,4 +46,4 @@ jobs:
               context: 'Check PRs',
               description: 'Check if there are other open pull requests for this branch',
             };
-            await github.repos.createCommitStatus(status);      
+            await github.repos.createCommitStatus(status);
