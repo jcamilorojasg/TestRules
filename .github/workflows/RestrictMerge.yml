@@ -52,7 +52,7 @@ jobs:
           }
           $token = '${{ secrets.TOKEN_SECRET }}'
           $header = @{
-            Authorization = "Bearer $token"
+            Authorization = "Bearer ${{ secrets.TOKEN_SECRET }}"
             "Content-Type" = "application/json"
           }
           $apiUrl = "https://api.github.com/repos/${status.owner}/${status.repo}/statuses/$($status.sha)"
