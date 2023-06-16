@@ -50,8 +50,10 @@ jobs:
             context = "Check PRs"
             description = "Check if there are other open pull requests for this branch"
           }
-          $headers = @{
-            Authorization = "Bearer $env:GITHUB_TOKEN"
+              $token = ${{ secrets.GITHUB_TOKEN }}
+          $header = @{
+            Authorization = "Bearer $token"
             "Content-Type" = "application/json"
           }
-          Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/${env:GITHUB_REPOSITORY}/statuses/$env:GITHUB_SHA" -Headers $headers -ContentType "application/json" -Body ($status | ConvertTo-Json)
+          $apiUrl = "https://api.github.com/repos/${status.owner}/${status.repo}/statuses/$($status.sha)"
+          Invoke-RestMethod -Method Post -Uri $apiUrl -Headers $header -ContentType "application/json" -Body ($status | ConvertTo-Json)
