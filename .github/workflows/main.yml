@@ -42,4 +42,4 @@ jobs:
             context = "Check PRs"
             description = "Check if there are other open pull requests for this branch"
           }
-          Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/${{ github.repository }}/statuses/$env:GITHUB_SHA" -Headers @{Authorization = "Bearer $env:GITHUB_TOKEN"} -ContentType "application/json" -Body ($status | ConvertTo-Json)
+          Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/${{ github.repository }}/statuses/$env:GITHUB_SHA" -Headers @{Authorization = "Bearer $env:TOKEN_SECRET"} -ContentType "application/json" -Body ($status | ConvertTo-Json)
