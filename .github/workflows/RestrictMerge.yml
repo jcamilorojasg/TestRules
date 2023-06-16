@@ -1,0 +1,57 @@
+name: Restrict Merge
+
+on:
+  pull_request:
+    types:
+      - synchronize
+      - opened
+
+jobs:
+  check-prs:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: List Open PRs
+        id: list-prs
+        run: |
+          $prs = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&base=${{ github.event.pull_request.base.ref }}"
+          Write-Host "##vso[task.setvariable variable=prs;isOutput=true]$prs"
+
+      - name: Check PRs
+        run: |
+          $prs = $env:prs | ConvertFrom-Json
+          if ($prs -ne $null) {
+            $oldestPR = $prs | Sort-Object -Property created_at | Select-Object -First 1
+            if ($oldestPR.number -ne $env:GITHUB_PR_NUMBER) {
+              Write-Host "There are other open pull requests for this branch:"
+              Write-Host "$oldestPR"
+              Write-Host "##vso[task.setvariable variable=check_status]failure"
+            }
+            else {
+              Write-Host "No other open pull requests for this branch."
+              Write-Host "##vso[task.setvariable variable=check_status]success"
+            }
+          }
+          else {
+            Write-Host "No other open pull requests for this branch."
+            Write-Host "##vso[task.setvariable variable=check_status]success"
+          }
+
+      - name: Set Status Check
+        run: |
+          $status = @{
+            owner = $env:GITHUB_REPOSITORY.Split("/")[0]
+            repo = $env:GITHUB_REPOSITORY.Split("/")[1]
+            sha = $env:GITHUB_SHA
+            state = $env:check_status
+            context = "Check PRs"
+            description = "Check if there are other open pull requests for this branch"
+          }
+          $headers = @{
+            Authorization = "Bearer $env:GITHUB_TOKEN"
+            "Content-Type" = "application/json"
+          }
+          Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/${env:GITHUB_REPOSITORY}/statuses/$env:GITHUB_SHA" -Headers $headers -ContentType "application/json" -Body ($status | ConvertTo-Json)
