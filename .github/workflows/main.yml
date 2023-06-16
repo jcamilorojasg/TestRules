@@ -44,7 +44,7 @@ jobs:
           }
           $status | ConvertTo-Json | Out-File status.json
           $headers = @{
-            Authorization = "Bearer ${{ secrets.TOKEN_SECRET}}"
+            Authorization = "Bearer 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"
             "Content-Type" = "application/json"
           }
           Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/${{ github.repository }}/statuses/$env:GITHUB_SHA" -Headers $headers -InFile status.json
