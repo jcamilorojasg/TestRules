@@ -17,32 +17,29 @@ jobs:
       - name: List Open PRs
         id: list-prs
         run: |
-          prs=$(curl -s -X GET \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&base=${{ github.event.pull_request.base.ref }}")
+          $prs = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&base=${{ github.event.pull_request.base.ref }}"
           echo "::set-output name=prs::$prs"
 
       - name: Check PRs
         run: |
-          prs=$(echo "${{ steps.list-prs.outputs.prs }}" | jq '.[] | select(.number != ${{ github.event.pull_request.number }})')
-          if [ ! -z "$prs" ]; then
-            echo "There are other open pull requests for this branch:"
-            echo "$prs"
+          $prs = ${{ steps.list-prs.outputs.prs }}
+          if ($prs -ne $null) {
+            Write-Host "There are other open pull requests for this branch:"
+            Write-Host "$prs"
             echo "::set-output name=check_status::failure"
-          else
-            echo "No other open pull requests for this branch."
+          } else {
+            Write-Host "No other open pull requests for this branch."
             echo "::set-output name=check_status::success"
-          fi
+          }
 
       - name: Set Status Check
         run: |
-          token=$(curl -s -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}" \
-            -d "{
-              \"state\": \"${{ steps.check-prs.outputs.check_status }}\",
-              \"context\": \"Check PRs\",
-              \"description\": \"Check if there are other open pull requests for this branch\"
-            }")
+          $status = @{
+            owner = $env:GITHUB_REPOSITORY.Split("/")[0]
+            repo = $env:GITHUB_REPOSITORY.Split("/")[1]
+            sha = $env:GITHUB_SHA
+            state = ${{ steps.check-prs.outputs.check_status }}
+            context = "Check PRs"
+            description = "Check if there are other open pull requests for this branch"
+          } | ConvertTo-Json
+          Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/${{ github.repository }}/statuses/$env:GITHUB_SHA" -Headers @{Authorization = "Bearer $env:GITHUB_TOKEN"} -ContentType "application/json" -Body $status
