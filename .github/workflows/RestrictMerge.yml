@@ -22,21 +22,21 @@ jobs:
 
       - name: Check PRs
         run: |
-          $prs = $env:prs | ConvertFrom-Json
+          $prs = ${{ steps.list-prs.outputs.prs }}
           if ($prs -ne $null) {
-            $oldestPR = $prs | Sort-Object -Property created_at | Select-Object -First 1
+            $oldestPR = $prs | ConvertFrom-Json | Sort-Object -Property created_at | Select-Object -First 1
             if ($oldestPR.number -ne $env:GITHUB_PR_NUMBER) {
-              echo "check_status=failure" >> $GITHUB_ENV
+              echo "::set-output name=check_status::failure"
               echo "There are other open pull requests for this branch:"
               echo $oldestPR
             }
             else {
-              echo "check_status=success" >> $GITHUB_ENV
+              echo "::set-output name=check_status::success"
               echo "No other open pull requests for this branch."
             }
           }
           else {
-            echo "check_status=success" >> $GITHUB_ENV
+            echo "::set-output name=check_status::success"
             echo "No other open pull requests for this branch."
           }
 
