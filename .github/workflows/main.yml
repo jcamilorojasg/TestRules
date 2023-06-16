@@ -2,13 +2,11 @@ name: Check PRsJC
 
 on:
   pull_request_target:
-    types:
-      - opened
-      - synchronize
-      
+    types: [opened, synchronize]
+    
 jobs:
   check-prs:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
