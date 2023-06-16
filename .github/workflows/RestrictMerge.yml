@@ -18,7 +18,7 @@ jobs:
         id: list-prs
         run: |
           $prs = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&base=${{ github.event.pull_request.base.ref }}"
-          Write-Host "##vso[task.setvariable variable=prs;isOutput=true]$prs"
+          echo "prs=$prs" >> $GITHUB_ENV
 
       - name: Check PRs
         run: |
@@ -26,18 +26,18 @@ jobs:
           if ($prs -ne $null) {
             $oldestPR = $prs | Sort-Object -Property created_at | Select-Object -First 1
             if ($oldestPR.number -ne $env:GITHUB_PR_NUMBER) {
-              Write-Host "There are other open pull requests for this branch:"
-              Write-Host "$oldestPR"
-              Write-Host "##vso[task.setvariable variable=check_status]failure"
+              echo "check_status=failure" >> $GITHUB_ENV
+              echo "There are other open pull requests for this branch:"
+              echo $oldestPR
             }
             else {
-              Write-Host "No other open pull requests for this branch."
-              Write-Host "##vso[task.setvariable variable=check_status]success"
+              echo "check_status=success" >> $GITHUB_ENV
+              echo "No other open pull requests for this branch."
             }
           }
           else {
-            Write-Host "No other open pull requests for this branch."
-            Write-Host "##vso[task.setvariable variable=check_status]success"
+            echo "check_status=success" >> $GITHUB_ENV
+            echo "No other open pull requests for this branch."
           }
 
       - name: Set Status Check
