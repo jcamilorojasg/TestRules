@@ -1,4 +1,4 @@
-name: Check PRs
+name: Check PRsJC
 
 on:
   pull_request_target:
