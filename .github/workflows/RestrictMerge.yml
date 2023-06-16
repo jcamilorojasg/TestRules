@@ -50,7 +50,7 @@ jobs:
             context = "Check PRs"
             description = "Check if there are other open pull requests for this branch"
           }
-              $token = ${{ secrets.GITHUB_TOKEN }}
+          $token = '${{ secrets.TOKEN_SECRET }}'
           $header = @{
             Authorization = "Bearer $token"
             "Content-Type" = "application/json"
