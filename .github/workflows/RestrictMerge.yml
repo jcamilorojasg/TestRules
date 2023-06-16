@@ -51,6 +51,7 @@ jobs:
             description = "Check if there are other open pull requests for this branch"
           }
           $token = '${{ secrets.TOKEN_SECRET }}'
+          Write-Host "Token: $token"
           $header = @{
             Authorization = "Bearer $token"
             "Content-Type" = "application/json"
