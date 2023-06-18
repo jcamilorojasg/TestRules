@@ -22,6 +22,7 @@ jobs:
       - name: Check PRs
         run: |
           $prs = ${{ steps.list-prs.outputs.prs }}
+          echo $prs
           if ($prs -ne $null) {
             $oldestPR = $prs | ConvertFrom-Json | Sort-Object -Property created_at | Select-Object -First 1
             echo $oldestPR
