@@ -42,7 +42,7 @@ jobs:
 
       - name: Set Status Check
         run: |
-          echo $env:check_status
+          echo "check_status = $env:check_status"
           $status = @{
             owner = $env:GITHUB_REPOSITORY.Split("/")[0]
             repo = $env:GITHUB_REPOSITORY.Split("/")[1]
