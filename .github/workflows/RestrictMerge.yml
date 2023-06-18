@@ -21,7 +21,6 @@ jobs:
           foreach ($pr in $prs) {
             echo "PR Number: $($pr.number)"
           }
-          echo "prs=$prs" >> $GITHUB_ENV
           echo "PR_LIST=$prs" >> $GITHUB_ENV
       - name: Check PRs
         run: |
