@@ -42,6 +42,7 @@ jobs:
 
       - name: Set Status Check
         run: |
+          echo $env:check_status
           $status = @{
             owner = $env:GITHUB_REPOSITORY.Split("/")[0]
             repo = $env:GITHUB_REPOSITORY.Split("/")[1]
@@ -55,7 +56,6 @@ jobs:
             Authorization = "Bearer ${{ secrets.TOKEN_SECRET }}"
             "Content-Type" = "application/json"
           }
-          echo $status.state
           $apiUrl = "https://api.github.com/repos/$($status.owner)/$($status.repo)/statuses/$($status.sha)"
           echo $apiUrl
           Invoke-RestMethod -Method Post -Uri $apiUrl -Headers $header -ContentType "application/json" -Body ($status | ConvertTo-Json)
