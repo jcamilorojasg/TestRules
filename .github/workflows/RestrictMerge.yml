@@ -26,6 +26,7 @@ jobs:
 
       - name: Check PRs
         run: |
+          echo "PR PR_LIST: $env:PR_LIST"
           $prs = $env:PR_LIST
           if ($prs -ne $null) {
             $oldestPR = $prs | ConvertFrom-Json | Sort-Object -Property created_at | Select-Object -First 1
