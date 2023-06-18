@@ -55,7 +55,9 @@ jobs:
             Authorization = "Bearer ${{ secrets.TOKEN_SECRET }}"
             "Content-Type" = "application/json"
           }
+          echo $status.owner
+          echo $status.repo
           echo $status.sha
-          $apiUrl = "https://api.github.com/repos/$env:GITHUB_REPOSITORY.Split("/")[0]/$env:GITHUB_REPOSITORY.Split("/")[1]/statuses/$($status.sha)"
+          $apiUrl = "https://api.github.com/repos/${status.owner}/${status.repo}/statuses/$($status.sha)"
           echo $apiUrl
           Invoke-RestMethod -Method Post -Uri $apiUrl -Headers $header -ContentType "application/json" -Body ($status | ConvertTo-Json)
