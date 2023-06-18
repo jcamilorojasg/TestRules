@@ -8,7 +8,7 @@ on:
 
 jobs:
   check-prsRM:
-    runs-on: windows-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
