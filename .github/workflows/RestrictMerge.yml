@@ -25,8 +25,8 @@ jobs:
           echo "PR_LIST=$prs" >> $GITHUB_ENV
       - name: Check PRs
         run: |
-          echo "PR PR_LIST: $env:PR_LIST"
-          $prs = $env:PR_LIST
+          echo "PR PR_LIST: ${{ env.PR_LIST }}"
+          $prs = ${{ env.PR_LIST }}
           if ($prs -ne $null) {
             $oldestPR = $prs | ConvertFrom-Json | Sort-Object -Property created_at | Select-Object -First 1
             echo $oldestPR
@@ -47,7 +47,6 @@ jobs:
             echo "check_status=success" >> $GITHUB_ENV
             echo "No other open pull requests for this branch."
           }
-
       - name: Set Status Check
         run: |
           echo "check_status = $env:check_status"
