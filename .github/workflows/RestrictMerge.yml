@@ -22,6 +22,7 @@ jobs:
            foreach ($pr in $prs) {
             echo "PR Number: $($pr.number)"
           }
+          echo "PR_LIST = ${{ env.PR_LIST }}"
       - name: Check PRs
         run: |
           echo "PR PR_LIST: ${{ env.PR_LIST }}"
