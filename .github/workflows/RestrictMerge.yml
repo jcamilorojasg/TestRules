@@ -19,6 +19,7 @@ jobs:
         run: |
           $prs = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&base=${{ github.event.pull_request.base.ref }}"
           echo "prs=$prs" >> $GITHUB_ENV
+          echo $prs
 
       - name: Check PRs
         run: |
