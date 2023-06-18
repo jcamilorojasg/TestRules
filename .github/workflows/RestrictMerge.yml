@@ -7,7 +7,7 @@ on:
       - opened
 
 jobs:
-  check-prs:
+  check-prsRM:
     runs-on: self-hosted
 
     steps:
