@@ -24,6 +24,7 @@ jobs:
           $prs = ${{ steps.list-prs.outputs.prs }}
           if ($prs -ne $null) {
             $oldestPR = $prs | ConvertFrom-Json | Sort-Object -Property created_at | Select-Object -First 1
+            echo $oldestPR
             if ($oldestPR.number -ne $env:GITHUB_PR_NUMBER) {
               echo "::set-output name=check_status::failure"
               echo "There are other open pull requests for this branch:"
