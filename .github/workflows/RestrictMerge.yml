@@ -24,7 +24,7 @@ jobs:
           }
       - name: Check PRs
         run: |
-          echo ${{steps.list-prs.outputs}}
+          echo ${{steps}}
           $prs = ${{ steps.list-prs.outputs.prs }}
           echo $prs
           echo "PR List: $prs"
