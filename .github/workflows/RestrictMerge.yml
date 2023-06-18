@@ -23,6 +23,7 @@ jobs:
             echo "PR Number: $($pr.number)"
           }
           echo "PR_LIST=$prs" >> $GITHUB_ENV
+          echo "PR PR_LIST1: $env:PR_LIST"
 
       - name: Check PRs
         run: |
