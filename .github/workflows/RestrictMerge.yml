@@ -27,7 +27,7 @@ jobs:
         run: |
           $prs = Get-Content prs.json | ConvertFrom-Json
           if ($prs -ne $null) {
-            $oldestPR = $prs | ConvertFrom-Json | Sort-Object -Property created_at | Select-Object -First 1
+            $oldestPR = $prs | Sort-Object -Property created_at | Select-Object -First 1
             echo $oldestPR
             if ($oldestPR.number -ne $env:GITHUB_PR_NUMBER) {
               echo "check_status=failure" >> $GITHUB_ENV
@@ -46,6 +46,7 @@ jobs:
             echo "check_status=success" >> $GITHUB_ENV
             echo "No other open pull requests for this branch."
           }
+
       - name: Set Status Check
         run: |
           echo "check_status = $env:check_status"
