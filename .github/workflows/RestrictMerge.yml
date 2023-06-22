@@ -28,7 +28,8 @@ jobs:
           $prs = Get-Content prs.json | ConvertFrom-Json
           if ($prs -ne $null) {
             $oldestPR = $prs | Sort-Object -Property created_at | Select-Object -First 1
-            echo $oldestPR
+            echo $oldestPR.number
+            echo $env:GITHUB_PR_NUMBER
             if ($oldestPR.number -ne $env:GITHUB_PR_NUMBER) {
               $status = @{
                 check_status = "failure"
