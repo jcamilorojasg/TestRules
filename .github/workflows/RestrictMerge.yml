@@ -7,7 +7,7 @@ on:
       - opened
 
 jobs:
-  check-prs:
+  check-prsRM2:
     runs-on: self-hosted
 
     steps:
@@ -68,7 +68,7 @@ jobs:
             repo = $env:GITHUB_REPOSITORY.Split("/")[1]
             sha = $env:GITHUB_SHA
             state = $status.check_status
-            context = "check-prs"
+            context = "check-prsRM2"
             description = $status.message
           }
 
