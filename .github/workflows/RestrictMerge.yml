@@ -18,15 +18,14 @@ jobs:
         id: list-prs
         run: |
           $prs = Invoke-RestMethod -Method Get -Uri "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&base=${{ github.event.pull_request.base.ref }}"
-          echo "PR_LIST=$prs" >> $env:GITHUB_ENV
+          $prs | ConvertTo-Json | Out-File prs.json
            foreach ($pr in $prs) {
             echo "PR Number: $($pr.number)"
           }
           echo "PR_LIST = ${{ env.PR_LIST }}"
       - name: Check PRs
         run: |
-          echo "PR PR_LIST: ${{ env.PR_LIST }}"
-          $prs = ${{ env.PR_LIST }}
+          $prs = Get-Content prs.json | ConvertFrom-Json
           if ($prs -ne $null) {
             $oldestPR = $prs | ConvertFrom-Json | Sort-Object -Property created_at | Select-Object -First 1
             echo $oldestPR
