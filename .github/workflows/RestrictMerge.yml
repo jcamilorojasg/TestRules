@@ -68,7 +68,7 @@ jobs:
             repo = $env:GITHUB_REPOSITORY.Split("/")[1]
             sha = $env:GITHUB_SHA
             state = $status.check_status
-            context = "check-prsRM"
+            context = "check-prs"
             description = $status.message
           }
 
