@@ -29,8 +29,8 @@ jobs:
           if ($prs -ne $null) {
             $oldestPR = $prs | Sort-Object -Property created_at | Select-Object -First 1
             echo "oldestPR.number: $oldestPR.number"
-            echo "GITHUB_PR_NUMBER: $env:GITHUB_PR_NUMBER"
-            if ($oldestPR.number -ne $env:GITHUB_PR_NUMBER ) {
+            echo "GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}"
+            if ($oldestPR.number -ne ${{ github.event.pull_request.number }}) {
               $status = @{
                 check_status = "failure"
                 message = "There are other open pull requests for this branch."
