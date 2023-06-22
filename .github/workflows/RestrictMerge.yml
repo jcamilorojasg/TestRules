@@ -63,6 +63,9 @@ jobs:
           echo "message = $($status.message)"
 
           $statusData = @{
+            owner = $env:GITHUB_REPOSITORY.Split("/")[0]
+            repo = $env:GITHUB_REPOSITORY.Split("/")[1]
+            sha = $env:GITHUB_SHA
             state = $status.check_status
             context = "Check PRs"
             description = $status.message
