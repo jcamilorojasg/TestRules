@@ -1,4 +1,4 @@
-23423424123123123123213123123123# Salesforce DX Project: Next Steps123123
+23423424123123123123213123123123# Salesforce DX Pro3434ject: Next Steps123123
 
 Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
 
