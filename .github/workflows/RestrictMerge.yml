@@ -32,10 +32,6 @@ jobs:
             if ($oldestPR.number -ne $env:GITHUB_PR_NUMBER) {
               echo "check_status=failure" >> $GITHUB_ENV
               echo "There are other open pull requests for this branch:"
-              foreach ($pr in $prs) {
-                echo "PR Number: $($pr.number)"
-                echo $pr
-              }
             }
             else {
               echo "check_status=success" >> $GITHUB_ENV
