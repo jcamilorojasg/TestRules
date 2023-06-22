@@ -30,35 +30,50 @@ jobs:
             $oldestPR = $prs | Sort-Object -Property created_at | Select-Object -First 1
             echo $oldestPR
             if ($oldestPR.number -ne $env:GITHUB_PR_NUMBER) {
-              echo "check_status=failure" >> $GITHUB_ENV
+              $status = @{
+                check_status = "failure"
+                message = "There are other open pull requests for this branch."
+              } | ConvertTo-Json | Out-File check_status.json
               echo "There are other open pull requests for this branch:"
+              foreach ($pr in $prs) {
+                echo "PR Number: $($pr.number)"
+                echo $pr
+              }
             }
             else {
-              echo "check_status=success" >> $GITHUB_ENV
+              $status = @{
+                check_status = "success"
+                message = "No other open pull requests for this branch."
+              } | ConvertTo-Json | Out-File check_status.json
               echo "No other open pull requests for this branch."
             }
           }
           else {
-            echo "check_status=success" >> $GITHUB_ENV
+            $status = @{
+              check_status = "success"
+              message = "No other open pull requests for this branch."
+            } | ConvertTo-Json | Out-File check_status.json
             echo "No other open pull requests for this branch."
           }
 
       - name: Set Status Check
         run: |
-          echo "check_status = $env:check_status"
-          $status = @{
-            owner = $env:GITHUB_REPOSITORY.Split("/")[0]
-            repo = $env:GITHUB_REPOSITORY.Split("/")[1]
-            sha = $env:GITHUB_SHA
-            state = $env:check_status
+          $status = Get-Content check_status.json | ConvertFrom-Json
+          echo "check_status = $($status.check_status)"
+          echo "message = $($status.message)"
+
+          $statusData = @{
+            state = $status.check_status
             context = "Check PRs"
-            description = "Check if there are other open pull requests for this branch"
+            description = $status.message
           }
+
           $token = '${{ secrets.TOKEN_SECRET }}'
           $header = @{
-            Authorization = "Bearer ${{ secrets.TOKEN_SECRET }}"
+            Authorization = "Bearer $token"
             "Content-Type" = "application/json"
           }
-          $apiUrl = "https://api.github.com/repos/$($status.owner)/$($status.repo)/statuses/$($status.sha)"
-          echo $apiUrl
-          Invoke-RestMethod -Method Post -Uri $apiUrl -Headers $header -ContentType "application/json" -Body ($status | ConvertTo-Json)
+
+          $apiUrl = "https://api.github.com/repos/$($env:GITHUB_REPOSITORY)/statuses/$($env:GITHUB_SHA)"
+
+          Invoke-RestMethod -Method Post -Uri $apiUrl -Headers $header -ContentType "application/json" -Body ($statusData | ConvertTo-Json)
